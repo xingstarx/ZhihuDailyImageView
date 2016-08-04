@@ -17,7 +17,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         mImageView = (ImageView) findViewById(R.id.image_view);
         Picasso.with(this)
-                .load("http://pic3.zhimg.com/3825faa815406406e521902624261442.jpg")
+                .load("http://pic4.zhimg.com/70/f3bfac899b2e83f2f7c5aaa9814814f3_b.jpg")
                 .fit().centerInside()
                 .into(mImageView, new Callback() {
                     @Override

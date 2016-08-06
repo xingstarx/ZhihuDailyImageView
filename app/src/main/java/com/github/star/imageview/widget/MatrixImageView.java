@@ -23,10 +23,31 @@ public class MatrixImageView extends ImageView implements View.OnTouchListener{
     private ImageView.ScaleType mScaleType = ScaleType.MATRIX;
     private ScaleGestureDetector mScaleGestureDetector;
     private GestureDetector mGestureDetector;
+    private static final float MIN_SCALE = 0.5f;
+    private static final float DEFAULT_SCALE = 1f;
+    private static final float MID_SCALE = 1.75f;
+    private static final float MAX_SCALE = 3f;
+    private float mMinScale = MIN_SCALE;
+    private float mDefaultScale = DEFAULT_SCALE;
+    private float mMidScale = MID_SCALE;
+    private float mMaxScale = MAX_SCALE;
+    private static final String TAG = "MatrixImageView";
+
     @NonNull
     private GestureDetector.SimpleOnGestureListener mSimpleOnGestureListener = new GestureDetector.SimpleOnGestureListener() {
         @Override
         public boolean onDoubleTap(MotionEvent e) {
+            float scale = getScale(mCurrentMatrix);
+            float scaleFactor = 0;
+            if (scale < mMidScale) {
+                scaleFactor = mMidScale / scale;
+            } else if (scale < mMaxScale) {
+                scaleFactor = mMaxScale / scale;
+            } else if (scale >= mMaxScale) {
+                scaleFactor = mDefaultScale / scale;
+            }
+            mCurrentMatrix.postScale(scaleFactor, scaleFactor, getImageWidth() / 2, getImageHeight() / 2);
+            setImageMatrix(mCurrentMatrix);
             return true;
         }
     };
@@ -52,7 +73,6 @@ public class MatrixImageView extends ImageView implements View.OnTouchListener{
     }
 
     private void initView(Context context, AttributeSet attrs, int defStyleAttr) {
-        mScaleType = getScaleType();
         if (mScaleType != getScaleType()) {
             setScaleType(mScaleType);
         }
@@ -98,5 +118,14 @@ public class MatrixImageView extends ImageView implements View.OnTouchListener{
         boolean flag = mGestureDetector.onTouchEvent(event);
         flag |= mScaleGestureDetector.onTouchEvent(event);
         return flag;
+    }
+
+    private float getScale(Matrix matrix) {
+        return (float) Math.hypot(getValue(matrix, Matrix.MSCALE_X), getValue(matrix, Matrix.MSCALE_Y));
+    }
+
+    private float getValue(Matrix matrix, int whichValue) {
+        matrix.getValues(mTempValues);
+        return mTempValues[whichValue];
     }
 }

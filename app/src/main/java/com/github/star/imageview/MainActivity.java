@@ -1,5 +1,7 @@
 package com.github.star.imageview;
 
+import android.graphics.Matrix;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -13,10 +15,15 @@ import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 public class MainActivity extends AppCompatActivity implements View.OnTouchListener {
+    private static final String TAG = "MainActivity";
 
     private ImageView mImageView;
     private ScaleGestureDetector mScaleGestureDetector;
     private GestureDetector mGestureDetector;
+    private Matrix mTempMatrix = new Matrix();
+    private Matrix mCurrentMatrix = new Matrix();
+    private float[] mTempValues = new float[9];
+
     @NonNull
     private GestureDetector.SimpleOnGestureListener mSimpleOnGestureListener = new GestureDetector.SimpleOnGestureListener() {
         @Override

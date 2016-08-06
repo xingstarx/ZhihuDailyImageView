@@ -39,6 +39,8 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         mImageView = (ImageView) findViewById(R.id.image_view);
         mScaleGestureDetector = new ScaleGestureDetector(this, mSimpleOnScaleGestureListener);
         mGestureDetector = new GestureDetector(this, mSimpleOnGestureListener);
+        mImageView.setScaleType(ImageView.ScaleType.MATRIX);
+        mTempMatrix = mImageView.getImageMatrix();
         mImageView.setOnTouchListener(this);
         Picasso.with(this)
                 .load("http://pic4.zhimg.com/70/f3bfac899b2e83f2f7c5aaa9814814f3_b.jpg")
@@ -46,6 +48,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
                 .into(mImageView, new Callback() {
                     @Override
                     public void onSuccess() {
+                        update();
                     }
 
                     @Override
@@ -60,4 +63,36 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         flag |= mScaleGestureDetector.onTouchEvent(event);
         return flag;
     }
+    public void update() {
+        if (!hasDrawable()) {
+            return;
+        }
+        mCurrentMatrix.postTranslate((getImageWidth() - getDrawableWidth()) / 2, (getImageHeight() - getDrawableHeight()) / 2);
+        mTempMatrix.set(mCurrentMatrix);
+        mImageView.setImageMatrix(mCurrentMatrix);
+    }
+
+    private boolean hasDrawable() {
+        if (mImageView != null && mImageView.getDrawable() != null && mImageView.getDrawable() instanceof BitmapDrawable) {
+            return true;
+        }
+        return false;
+    }
+
+    private float getImageWidth() {
+        return mImageView.getMeasuredWidth() - mImageView.getPaddingLeft() - mImageView.getPaddingRight();
+    }
+
+    private float getImageHeight() {
+        return mImageView.getMeasuredHeight() - mImageView.getPaddingTop() - mImageView.getPaddingBottom();
+    }
+
+    private float getDrawableWidth() {
+        return mImageView.getDrawable().getIntrinsicWidth();
+    }
+
+    private float getDrawableHeight() {
+        return mImageView.getDrawable().getIntrinsicHeight();
+    }
+
 }

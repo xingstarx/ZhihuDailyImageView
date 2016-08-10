@@ -1,7 +1,9 @@
 package com.github.star.imageview;
 
+import android.graphics.Matrix;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 
 import com.github.star.imageview.widget.MatrixImageView;
 import com.squareup.picasso.Callback;
@@ -30,5 +32,41 @@ public class MainActivity extends AppCompatActivity {
                     public void onError() {
                     }
                 });
+
+        init();
     }
+
+    private void init() {
+        Matrix matrix = new Matrix();
+        Matrix matrix2 = new Matrix();
+
+        float[] values = new float[]{1.2f, 0, 30, 0, 1.2f, 30, 0, 0, 1};
+        float[] values2 = new float[]{1.2f, 0, 0, 0, 1.2f, 0, 0, 0, 1};
+
+        matrix.setValues(values);
+        matrix2.setValues(values2);
+
+        printValues(matrix);
+        boolean flag = matrix.preConcat(matrix2);
+        Log.e(TAG, "***************** flag == " + flag);
+        printValues(matrix);
+
+    }
+
+
+    public void printValues(Matrix matrix) {
+        float[] values = new float[9];
+        matrix.getValues(values);
+        StringBuilder sbf = new StringBuilder();
+        sbf.append("{ ");
+        for (int i = 0; i < values.length; i++) {
+            sbf.append(values[i]);
+            if (i != values.length -1) {
+                sbf.append(", ");
+            }
+        }
+        sbf.append(" }");
+        Log.e(TAG, "matrix == " + sbf.toString());
+    }
+
 }

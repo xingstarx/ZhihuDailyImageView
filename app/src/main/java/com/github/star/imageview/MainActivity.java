@@ -47,7 +47,9 @@ public class MainActivity extends AppCompatActivity {
         matrix2.setValues(values2);
 
         printValues(matrix);
-        boolean flag = matrix.preConcat(matrix2);
+
+        boolean flag = matrix.preScale(1.2f, 1.2f);
+
         Log.e(TAG, "***************** flag == " + flag);
         printValues(matrix);
 

@@ -9,6 +9,8 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.Interpolator;
 import android.widget.ImageView;
 
 /**
@@ -16,7 +18,7 @@ import android.widget.ImageView;
  * @desc support scale imageView
  */
 
-public class MatrixImageView extends ImageView implements View.OnTouchListener{
+public class MatrixImageView extends ImageView implements View.OnTouchListener {
     private Matrix mTempMatrix = new Matrix();
     private Matrix mCurrentMatrix = new Matrix();
     private float[] mTempValues = new float[9];
@@ -32,22 +34,25 @@ public class MatrixImageView extends ImageView implements View.OnTouchListener{
     private float mMidScale = MID_SCALE;
     private float mMaxScale = MAX_SCALE;
     private static final String TAG = "MatrixImageView";
+    static final Interpolator mInterpolator = new AccelerateDecelerateInterpolator();
+    public static final int DEFAULT_ZOOM_DURATION = 200;
+
+
 
     @NonNull
     private GestureDetector.SimpleOnGestureListener mSimpleOnGestureListener = new GestureDetector.SimpleOnGestureListener() {
         @Override
         public boolean onDoubleTap(MotionEvent e) {
             float scale = getScale(mCurrentMatrix);
-            float scaleFactor = 0;
-            if (scale < mMidScale) {
-                scaleFactor = mMidScale / scale;
-            } else if (scale < mMaxScale) {
-                scaleFactor = mMaxScale / scale;
+            float zoomEnd = 0;
+            if (scale >= mDefaultScale && scale < mMidScale) {
+                zoomEnd = mMidScale;
+            } else if (scale >= mMidScale && scale < mMaxScale) {
+                zoomEnd = mMaxScale;
             } else if (scale >= mMaxScale) {
-                scaleFactor = mDefaultScale / scale;
+                zoomEnd = mDefaultScale;
             }
-            mCurrentMatrix.postScale(scaleFactor, scaleFactor, getImageWidth() / 2, getImageHeight() / 2);
-            setImageMatrix(mCurrentMatrix);
+            post(new AnimatedZoomRunnable(getImageWidth() / 2, getImageHeight() / 2, scale, zoomEnd));
             return true;
         }
     };
@@ -127,5 +132,39 @@ public class MatrixImageView extends ImageView implements View.OnTouchListener{
     private float getValue(Matrix matrix, int whichValue) {
         matrix.getValues(mTempValues);
         return mTempValues[whichValue];
+    }
+
+    private class AnimatedZoomRunnable implements Runnable {
+        private final float mFocalX, mFocalY;
+        private final long mStartTime;
+        private final float mZoomStart, mZoomEnd;
+
+        public AnimatedZoomRunnable(float mFocalX, float mFocalY, float mZoomStart, float mZoomEnd) {
+            this.mFocalX = mFocalX;
+            this.mFocalY = mFocalY;
+            this.mStartTime = System.currentTimeMillis();
+            this.mZoomStart = mZoomStart;
+            this.mZoomEnd = mZoomEnd;
+        }
+
+        @Override
+        public void run() {
+            float t = interpolate();
+            float scale = mZoomStart + t * (mZoomEnd - mZoomStart);
+            float deltaScale = scale / getScale(mCurrentMatrix);
+            mCurrentMatrix.postScale(deltaScale, deltaScale, mFocalX, mFocalY);
+            setImageMatrix(mCurrentMatrix);
+            // We haven't hit our target scale yet, so post ourselves again
+            if (t < 1f) {
+                postOnAnimation(this);
+            }
+        }
+
+        private float interpolate() {
+            float t = 1f * (System.currentTimeMillis() - mStartTime) / DEFAULT_ZOOM_DURATION;
+            t = Math.min(1f, t);
+            t = mInterpolator.getInterpolation(t);
+            return t;
+        }
     }
 }

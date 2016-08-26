@@ -121,7 +121,7 @@ public class MatrixImageView extends ImageView implements View.OnTouchListener{
     }
 
     private float getScale(Matrix matrix) {
-        return (float) Math.hypot(getValue(matrix, Matrix.MSCALE_X), getValue(matrix, Matrix.MSCALE_Y));
+        return (float) Math.hypot(getValue(matrix, Matrix.MSCALE_X), getValue(matrix, Matrix.MSKEW_Y));
     }
 
     private float getValue(Matrix matrix, int whichValue) {

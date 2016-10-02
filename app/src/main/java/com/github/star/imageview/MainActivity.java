@@ -19,6 +19,7 @@ public class MainActivity extends AppCompatActivity {
         mImageView = (MatrixImageView) findViewById(R.id.image_view);
         Picasso.with(this)
                 .load("http://pic4.zhimg.com/70/f3bfac899b2e83f2f7c5aaa9814814f3_b.jpg")
+                .placeholder(R.drawable.bg_default)
                 .fit().centerInside()
                 .into(mImageView, new Callback() {
                     @Override
